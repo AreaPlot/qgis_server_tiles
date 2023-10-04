@@ -1,0 +1,49 @@
+version: '3.7'
+
+services:
+  qgis:
+    build: .
+    expose:
+      - 5555
+    volumes:
+    - ./qgis_data:/data:ro
+    environment:
+    - LANG=en_EN.UTF-8
+    - QGIS_PROJECT_FILE=/data/tiles.qgs
+    - QGIS_SERVER_LOG_LEVEL=WARNING 
+    - DEBUG=1
+    - QGIS_SERVER_DISABLE_GETPRINT=1
+    - QGIS_SERVER_PARALLEL_RENDERING=1
+    env_file: .env
+    networks:
+      - qgis_server_tiles
+
+  nginx:
+    image: nginx:1.13
+    ports:
+    - 8080:80
+    volumes:
+    - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+    - qgis
+    networks:
+      - qgis_server_tiles
+
+  mapproxy:
+    image: kartoza/mapproxy
+    ports:
+      - 8090:8080
+    depends_on:
+      - qgis
+      - nginx
+    volumes:
+      - ./tiles:/tilecache
+      - ./mapproxy:/mapproxy
+    networks:
+      - qgis_server_tiles
+
+
+networks:
+  qgis_server_tiles:
+    name: qgis_server_tiles
+    external: true
