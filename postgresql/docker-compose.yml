@@ -1,0 +1,20 @@
+version: '3.7'
+
+services:
+  postgres:
+    image: postgis/postgis:14-3.4
+    env_file: ../.env
+    expose:
+      - 5432
+    ports:
+      - 5432:5432
+    volumes: 
+      - ./pgsql/:/var/lib/pgsql
+    networks:
+      - qgis_server_tiles
+
+
+networks:
+  qgis_server_tiles:
+    name: qgis_server_tiles
+    external: true

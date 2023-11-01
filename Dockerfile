@@ -40,7 +40,7 @@ ENV QGIS_SERVER_LOG_LEVEL 2
 # custom fonts
 COPY ./fonts/* /usr/local/share/fonts/
 
-COPY ./data/cmd.sh /home/qgis/cmd.sh
+COPY ./cmd.sh /home/qgis/cmd.sh
 RUN chmod -R 777 /home/qgis/cmd.sh
 RUN chown qgis:qgis /home/qgis/cmd.sh
 

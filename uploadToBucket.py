@@ -8,9 +8,11 @@ import traceback
 import sys
 
 logging.basicConfig(
-    format='%(asctime)s %(levelname)-8s %(message)s',
+    format="%(asctime)s %(levelname)-8s %(message)s",
     level=logging.INFO,
-    datefmt='%Y-%m-%d %H:%M:%S')
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
 
 def walk_tree(starting_point, database_file):
     path = starting_point
@@ -59,10 +61,15 @@ def process_upload_queue(database_file, file_size=0):
         try:
             update_records = []
             for item in queue:
-                s3_client.upload_file(item[0], os.environ["AWS_BUCKET"], item[1])
+                s3_client.upload_file(
+                    item[0],
+                    os.environ["AWS_BUCKET"],
+                    item[1],
+                    ExtraArgs={"ContentType": "image/png"},
+                )
                 update_records.append(item[0])
-            questionmarks = "?"*len(update_records)
-            update_sql = update_sql_template.format(','.join(questionmarks))
+            questionmarks = "?" * len(update_records)
+            update_sql = update_sql_template.format(",".join(questionmarks))
             cur.execute(update_sql, update_records)
         except Exception:
             logging.error(traceback.format_exc())
@@ -112,7 +119,9 @@ if __name__ == "__main__":
         help="Upload using the logging database specified.",
         action="store_true",
     )
-    parser.add_argument("-s", "--size", help="Upload files over the specified size (bytes).")
+    parser.add_argument(
+        "-s", "--size", help="Upload files over the specified size (bytes)."
+    )
 
     args = parser.parse_args()
     if args.overwrite:
